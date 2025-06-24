@@ -19,7 +19,7 @@ export const SocketProvider = ({ children }) => {
   const [lastPing, setLastPing] = useState(null);
 
   const connect = useCallback(() => {
-    const socketUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:5000';
+    const socketUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:5001';
     
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling'],

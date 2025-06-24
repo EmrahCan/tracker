@@ -254,7 +254,7 @@ export const MissileProvider = ({ children }) => {
     
     try {
       const queryParams = new URLSearchParams(params).toString();
-      const response = await fetch(`/api/missiles?${queryParams}`);
+      const response = await fetch(`http://localhost:5001/api/missiles?${queryParams}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -272,7 +272,7 @@ export const MissileProvider = ({ children }) => {
 
   const fetchActiveMissiles = useCallback(async () => {
     try {
-      const response = await fetch('/api/missiles/active');
+      const response = await fetch('http://localhost:5001/api/missiles/active');
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -289,7 +289,7 @@ export const MissileProvider = ({ children }) => {
 
   const fetchMissileStats = useCallback(async () => {
     try {
-      const response = await fetch('/api/missiles/stats/summary');
+      const response = await fetch('http://localhost:5001/api/missiles/stats/summary');
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

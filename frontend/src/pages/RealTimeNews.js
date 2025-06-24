@@ -28,7 +28,7 @@ const RealTimeNews = () => {
 
   const fetchStatus = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/news/status`);
+      const response = await fetch(`http://localhost:5001/api/news/status`);
       const data = await response.json();
       setStatus(data);
     } catch (error) {
@@ -39,7 +39,7 @@ const RealTimeNews = () => {
 
   const fetchSources = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/news/sources`);
+      const response = await fetch(`http://localhost:5001/api/news/sources`);
       const data = await response.json();
       setSources(data.sources || []);
     } catch (error) {
@@ -49,7 +49,7 @@ const RealTimeNews = () => {
 
   const fetchRecentMissiles = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/news/recent?limit=10`);
+      const response = await fetch(`http://localhost:5001/api/news/recent?limit=10`);
       const data = await response.json();
       setRecentMissiles(data.missiles || []);
     } catch (error) {
@@ -60,7 +60,7 @@ const RealTimeNews = () => {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/news/refresh`, {
+      const response = await fetch(`http://localhost:5001/api/news/refresh`, {
         method: 'POST'
       });
       const data = await response.json();
@@ -83,7 +83,7 @@ const RealTimeNews = () => {
   const handleLoadHistorical = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/news/load-historical`, {
+      const response = await fetch(`http://localhost:5001/api/news/load-historical`, {
         method: 'POST'
       });
       const data = await response.json();
