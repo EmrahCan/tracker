@@ -7,6 +7,7 @@ import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
+import RealTimeNews from './pages/RealTimeNews';
 import './App.css';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/news" element={<RealTimeNews />} />
               </Routes>
             </Layout>
           </Router>

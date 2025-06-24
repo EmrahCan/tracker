@@ -12,7 +12,8 @@ const { connectDB } = require('./config/database');
 const { connectRedis } = require('./config/redis');
 const routes = require('./routes');
 const { initializeWebSocket } = require('./services/websocket');
-const { startMissileSimulation } = require('./services/simulation');
+const MissileSimulation = require('./services/missileSimulation');
+const RealTimeService = require('./services/realTimeService');
 
 const app = express();
 const server = http.createServer(app);
@@ -77,33 +78,39 @@ app.use('*', (req, res) => {
 });
 
 // Initialize services
-async function startServer() {
+let simulationService;
+let realTimeService;
+
+if (process.env.SIMULATION_ENABLED === 'true') {
+  simulationService = new MissileSimulation(io);
+  console.log('🎮 Simulation mode enabled');
+} else {
+  realTimeService = new RealTimeService(io);
+  console.log('🌐 Real-time news monitoring enabled');
+}
+
+const startServer = async () => {
   try {
-    // Connect to databases
     await connectDB();
     await connectRedis();
     
-    // Initialize WebSocket
-    initializeWebSocket(io);
-    
-    // Start simulation if enabled
-    if (process.env.SIMULATION_ENABLED === 'true') {
-      startMissileSimulation(io);
-    }
-    
-    // Start server
-    const PORT = process.env.PORT || 5000;
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+    server.listen(parseInt(process.env.PORT) || 5000, () => {
+      console.log(`🚀 Server running on port ${parseInt(process.env.PORT) || 5000}`);
       console.log(`📡 WebSocket server ready`);
       console.log(`🎯 Environment: ${process.env.NODE_ENV}`);
+      
+      // Start appropriate service
+      if (simulationService) {
+        simulationService.start();
+      } else if (realTimeService) {
+        realTimeService.start();
+      }
     });
-    
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
-}
+};
 
 // Graceful shutdown
 process.on('SIGTERM', () => {

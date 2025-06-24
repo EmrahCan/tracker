@@ -8,7 +8,8 @@ import {
   Activity,
   AlertTriangle,
   Map,
-  Database
+  Database,
+  Globe
 } from 'lucide-react';
 import { useMissile } from '../../contexts/MissileContext';
 import { useSocket } from '../../contexts/SocketContext';
@@ -29,6 +30,12 @@ const Sidebar = ({ isOpen, onToggle }) => {
       name: 'Analytics',
       href: '/analytics',
       icon: BarChart3,
+      badge: null
+    },
+    {
+      name: 'RealTimeNews',
+      href: '/news',
+      icon: Globe,
       badge: null
     },
     {
@@ -192,7 +199,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
           {isOpen ? (
             <div className="text-xs text-gray-400">
-              <p>© 2024 Missile Tracker</p>
+              <p> 2024 Missile Tracker</p>
               <p>Real-time Monitoring System</p>
             </div>
           ) : (

@@ -4,11 +4,13 @@ const router = express.Router();
 const missileRoutes = require('./missiles');
 const analyticsRoutes = require('./analytics');
 const systemRoutes = require('./system');
+const newsRoutes = require('./news');
 
 // API Routes
 router.use('/missiles', missileRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/system', systemRoutes);
+router.use('/news', newsRoutes);
 
 // API Info
 router.get('/', (req, res) => {
@@ -19,7 +21,8 @@ router.get('/', (req, res) => {
     endpoints: {
       missiles: '/api/missiles',
       analytics: '/api/analytics',
-      system: '/api/system'
+      system: '/api/system',
+      news: '/api/news'
     },
     websocket: {
       url: '/socket.io',
