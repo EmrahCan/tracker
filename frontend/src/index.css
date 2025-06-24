@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+      monospace;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
+  }
+  
+  .btn-danger {
+    @apply btn bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500;
+  }
+  
+  .btn-success {
+    @apply btn bg-success-600 text-white hover:bg-success-700 focus:ring-success-500;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-lg border border-gray-200;
+  }
+  
+  .card-dark {
+    @apply bg-gray-800 rounded-lg shadow-lg border border-gray-700;
+  }
+  
+  .status-indicator {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .status-launched {
+    @apply status-indicator bg-warning-100 text-warning-800;
+  }
+  
+  .status-in-flight {
+    @apply status-indicator bg-primary-100 text-primary-800 animate-pulse;
+  }
+  
+  .status-intercepted {
+    @apply status-indicator bg-success-100 text-success-800;
+  }
+  
+  .status-impact {
+    @apply status-indicator bg-danger-100 text-danger-800;
+  }
+  
+  .status-failed {
+    @apply status-indicator bg-gray-100 text-gray-800;
+  }
+  
+  .threat-low {
+    @apply text-green-600 bg-green-100;
+  }
+  
+  .threat-medium {
+    @apply text-yellow-600 bg-yellow-100;
+  }
+  
+  .threat-high {
+    @apply text-orange-600 bg-orange-100;
+  }
+  
+  .threat-critical {
+    @apply text-red-600 bg-red-100 animate-pulse;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Leaflet map styles */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: #1a202c;
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: rgba(31, 41, 55, 0.9) !important;
+  color: white !important;
+  border: 1px solid rgba(75, 85, 99, 0.5) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: rgba(55, 65, 81, 0.9) !important;
+}
+
+/* Custom missile marker animations */
+.missile-marker {
+  animation: pulse 2s infinite;
+}
+
+.missile-trail {
+  stroke-dasharray: 5, 5;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* Alert animations */
+.alert-enter {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.alert-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.alert-exit {
+  opacity: 1;
+}
+
+.alert-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 300ms, transform 300ms;
+}
