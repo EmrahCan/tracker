@@ -12,7 +12,7 @@ const { connectDB } = require('./config/database');
 const { connectRedis } = require('./config/redis');
 const routes = require('./routes');
 const { initializeWebSocket } = require('./services/websocket');
-const MissileSimulation = require('./services/missileSimulation');
+const MissileSimulation = require('./services/simulation');
 const RealTimeService = require('./services/realTimeService');
 
 const app = express();

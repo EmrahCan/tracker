@@ -7,7 +7,6 @@ import {
   Target, 
   Activity,
   AlertTriangle,
-  Map,
   Database,
   Globe
 } from 'lucide-react';

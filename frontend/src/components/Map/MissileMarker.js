@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Marker, Popup } from 'react-leaflet';
-import { motion } from 'framer-motion';
 import L from 'leaflet';
 import { Target, Clock, MapPin, Zap } from 'lucide-react';
 import { format } from 'date-fns';
@@ -91,21 +90,6 @@ const MissileMarker = ({ missile, isSelected, onSelect }) => {
         return 'text-red-600';
       case 'failed':
         return 'text-gray-400';
-      default:
-        return 'text-gray-400';
-    }
-  };
-
-  const getThreatColor = (level) => {
-    switch (level) {
-      case 'critical':
-        return 'text-red-400';
-      case 'high':
-        return 'text-orange-400';
-      case 'medium':
-        return 'text-yellow-400';
-      case 'low':
-        return 'text-green-400';
       default:
         return 'text-gray-400';
     }

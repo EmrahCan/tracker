@@ -1,6 +1,6 @@
 # Gerçek Zamanlı Füze Takip Sistemi - Versiyon Geçmişi
 
-## Versiyon 1.0.0 - İlk Tam Sürüm
+## Versiyon 1.1.0 - Gerçek Zamanlı Haber Entegrasyonu
 **Tarih:** 25 Haziran 2025, 01:22  
 **Durum:** ✅ Tamamlandı ve Çalışır Durumda
 
@@ -21,6 +21,8 @@
 - ✅ Toast bildirimleri - kullanıcı geri bildirimleri
 - ✅ Context tabanlı state yönetimi
 - ✅ Framer Motion animasyonları
+- ✅ Gerçek Veriler Sayfası - API durumu ve kontrol paneli
+- ✅ Sidebar Menü - "Gerçek Veriler" navigasyon öğesi eklendi
 
 #### **Backend (Node.js)**
 - ✅ Express.js REST API
@@ -31,6 +33,9 @@
 - ✅ CORS konfigürasyonu ve rate limiting
 - ✅ Kapsamlı hata yönetimi ve loglama
 - ✅ Ortam değişkenleri konfigürasyonu
+- ✅ NewsService - haber API'lerinden veri çekme servisi
+- ✅ RealTimeService - gerçek zamanlı haber izleme ve analiz
+- ✅ API Entegrasyonları - OpenAI, NewsAPI, Guardian API
 
 #### **Altyapı ve DevOps**
 - ✅ Docker containerization hazır
@@ -83,6 +88,7 @@
 5. **Sistem Ayarları**: Bildirimler, görünüm ve güvenlik konfigürasyonu
 6. **Responsive Tasarım**: Mobil ve masaüstü uyumlu
 7. **Gerçek Zamanlı Simülasyon**: Otomatik füze fırlatma senaryoları
+8. **Gerçek Veriler Sayfası**: API durumu ve kontrol paneli
 
 ### 🔧 Kurulum ve Çalıştırma
 ```bash

@@ -9,8 +9,7 @@ import {
   AlertTriangle, 
   Clock,
   TrendingUp,
-  Shield,
-  Zap
+  Shield
 } from 'lucide-react';
 
 const Dashboard = () => {

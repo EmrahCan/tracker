@@ -8,9 +8,7 @@ import {
   MapPin,
   Activity,
   AlertTriangle,
-  Calendar,
-  Download,
-  Filter
+  Download
 } from 'lucide-react';
 import { useMissile } from '../contexts/MissileContext';
 

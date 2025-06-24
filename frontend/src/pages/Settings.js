@@ -3,12 +3,9 @@ import { motion } from 'framer-motion';
 import { 
   Settings as SettingsIcon, 
   Bell, 
-  Map, 
   Database,
   Shield,
   Monitor,
-  Volume2,
-  VolumeX,
   Eye,
   EyeOff,
   Save,
