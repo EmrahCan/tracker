@@ -1,5 +1,6 @@
 const express = require('express');
 const NewsService = require('../services/newsService');
+const WebScrapingService = require('../services/webScrapingService');
 const RealTimeService = require('../services/realTimeService');
 const Missile = require('../models/Missile');
 
@@ -12,11 +13,18 @@ router.get('/status', async (req, res) => {
     const status = {
       realTimeEnabled: process.env.REALTIME_ENABLED === 'true',
       simulationEnabled: process.env.SIMULATION_ENABLED === 'true',
+      webScrapingEnabled: true, // Web scraping her zaman mevcut
       lastUpdate: new Date(),
       totalMissiles: await Missile.countDocuments(),
       recentMissiles: await Missile.countDocuments({
         timestamp: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
-      })
+      }),
+      dataSources: {
+        newsAPI: process.env.NEWS_API_KEY ? 'configured' : 'missing',
+        guardianAPI: process.env.GUARDIAN_API_KEY ? 'configured' : 'missing',
+        openAI: process.env.OPENAI_API_KEY ? 'configured' : 'missing',
+        webScraping: 'available'
+      }
     };
 
     res.json(status);
@@ -30,16 +38,42 @@ router.get('/status', async (req, res) => {
 router.post('/refresh', async (req, res) => {
   try {
     const newsService = new NewsService();
+    const webScrapingService = new WebScrapingService();
     
     console.log('🔄 Manual news refresh requested');
     
-    // Son 24 saatin verilerini çek
-    const events = await newsService.getRealtimeMissileData();
+    let allEvents = [];
+    
+    // Önce API'lerden dene
+    try {
+      const apiEvents = await newsService.getRealtimeMissileData();
+      allEvents.push(...apiEvents);
+      console.log(`📰 API'lerden ${apiEvents.length} olay bulundu`);
+    } catch (error) {
+      console.log('⚠️ API hatası:', error.message);
+    }
+    
+    // Web scraping ile de dene
+    try {
+      console.log('🕷️ Web scraping başlatılıyor...');
+      const scrapedArticles = await webScrapingService.scrapeNews();
+      const analyzedArticles = await webScrapingService.analyzeWithLocalAI(scrapedArticles);
+      const scrapedEvents = webScrapingService.convertToMissileEvents(analyzedArticles);
+      
+      allEvents.push(...scrapedEvents);
+      console.log(`🕷️ Web scraping ile ${scrapedEvents.length} olay bulundu`);
+    } catch (error) {
+      console.log('⚠️ Web scraping hatası:', error.message);
+    }
     
     res.json({
       success: true,
-      message: `Found ${events.length} new missile events`,
-      events: events.length,
+      message: `Found ${allEvents.length} missile events`,
+      events: allEvents.length,
+      sources: {
+        api: allEvents.filter(e => e.metadata?.scrapingMethod !== 'web_scraping').length,
+        webScraping: allEvents.filter(e => e.metadata?.scrapingMethod === 'web_scraping').length
+      },
       timestamp: new Date()
     });
     
@@ -48,6 +82,34 @@ router.post('/refresh', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: 'Failed to refresh news data' 
+    });
+  }
+});
+
+// GET /api/news/scrape - Sadece web scraping test
+router.get('/scrape', async (req, res) => {
+  try {
+    console.log('🕷️ Web scraping test başlatılıyor...');
+    const webScrapingService = new WebScrapingService();
+    
+    const scrapedArticles = await webScrapingService.scrapeNews();
+    const analyzedArticles = await webScrapingService.analyzeWithLocalAI(scrapedArticles);
+    const events = webScrapingService.convertToMissileEvents(analyzedArticles);
+    
+    res.json({
+      success: true,
+      articlesFound: scrapedArticles.length,
+      missileEventsDetected: events.length,
+      articles: scrapedArticles.slice(0, 5), // İlk 5 makaleyi göster
+      events: events,
+      timestamp: new Date()
+    });
+    
+  } catch (error) {
+    console.error('❌ Web scraping test hatası:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
     });
   }
 });

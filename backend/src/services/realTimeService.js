@@ -1,13 +1,16 @@
 const NewsService = require('./newsService');
+const WebScrapingService = require('./webScrapingService');
 const Missile = require('../models/Missile');
 
 class RealTimeService {
   constructor(io) {
     this.io = io;
     this.newsService = new NewsService();
+    this.webScrapingService = new WebScrapingService();
     this.isRunning = false;
     this.checkInterval = 5 * 60 * 1000; // 5 dakika
     this.lastCheck = new Date();
+    this.useWebScraping = true; // Web scraping'i varsayılan olarak aktif
   }
 
   async start() {
@@ -67,7 +70,30 @@ class RealTimeService {
     try {
       console.log('🔍 Checking for new missile events...');
       
-      const realtimeEvents = await this.newsService.getRealtimeMissileData();
+      let realtimeEvents = [];
+      
+      // Önce API'lerden dene
+      try {
+        realtimeEvents = await this.newsService.getRealtimeMissileData();
+        console.log(`📰 API'lerden ${realtimeEvents.length} olay bulundu`);
+      } catch (error) {
+        console.log('⚠️ API hatası, web scraping\'e geçiliyor...');
+      }
+      
+      // API'ler çalışmıyorsa veya yeterli veri yoksa web scraping kullan
+      if (this.useWebScraping && realtimeEvents.length === 0) {
+        try {
+          console.log('🕷️ Web scraping ile haber toplama başlatılıyor...');
+          const scrapedArticles = await this.webScrapingService.scrapeNews();
+          const analyzedArticles = await this.webScrapingService.analyzeWithLocalAI(scrapedArticles);
+          const scrapedEvents = this.webScrapingService.convertToMissileEvents(analyzedArticles);
+          
+          realtimeEvents = [...realtimeEvents, ...scrapedEvents];
+          console.log(`🕷️ Web scraping ile ${scrapedEvents.length} olay bulundu`);
+        } catch (error) {
+          console.error('❌ Web scraping hatası:', error.message);
+        }
+      }
       
       if (realtimeEvents.length === 0) {
         console.log('📰 No new missile events found');
@@ -99,13 +125,19 @@ class RealTimeService {
     const newEvents = [];
     
     for (const event of events) {
+      // Veri formatını kontrol et
+      if (!event.source || !event.target) {
+        console.log('⚠️ Event missing source/target, skipping:', event.id);
+        continue;
+      }
+      
       // Benzer olay var mı kontrol et (aynı gün, benzer lokasyon)
       const existing = await Missile.findOne({
         timestamp: {
           $gte: new Date(event.timestamp).setHours(0, 0, 0, 0),
           $lt: new Date(event.timestamp).setHours(23, 59, 59, 999)
         },
-        'origin.country': event.origin.country,
+        'source.country': event.source.country,
         'target.country': event.target.country,
         type: event.type
       });
@@ -120,25 +152,32 @@ class RealTimeService {
 
   async saveMissileEvents(events) {
     try {
-      const missiles = events.map(event => ({
-        id: event.id || this.generateId(),
-        timestamp: new Date(event.timestamp),
-        origin: event.origin,
-        target: event.target,
-        currentPosition: event.origin.coordinates || [0, 0],
-        type: event.type,
-        status: event.status,
-        threatLevel: event.threatLevel,
-        speed: this.calculateSpeed(event.type),
-        altitude: this.calculateAltitude(event.type),
-        trajectory: this.calculateTrajectory(event.origin.coordinates, event.target.coordinates),
-        metadata: {
-          description: event.description,
-          source: event.source,
-          realData: true,
-          newsAnalysis: true
-        }
-      }));
+      const missiles = events.map(event => {
+        // Web scraping'den gelen veriler 'source' kullanıyor, API'ler 'origin' kullanıyor
+        const origin = event.origin || event.source;
+        const target = event.target;
+        
+        return {
+          id: event.id || this.generateId(),
+          timestamp: new Date(event.timestamp),
+          origin: origin,
+          target: target,
+          currentPosition: origin?.coordinates || [0, 0],
+          type: event.type,
+          status: event.status,
+          threatLevel: event.threatLevel,
+          speed: this.calculateSpeed(event.type),
+          altitude: this.calculateAltitude(event.type),
+          trajectory: this.calculateTrajectory(origin?.coordinates, target?.coordinates),
+          metadata: {
+            description: event.description,
+            source: event.source,
+            realData: true,
+            newsAnalysis: true,
+            ...event.metadata // Web scraping metadata'sını da dahil et
+          }
+        };
+      });
 
       await Missile.insertMany(missiles);
       console.log(`💾 Saved ${missiles.length} missile events to database`);
@@ -153,15 +192,24 @@ class RealTimeService {
 
   broadcastNewEvents(events) {
     events.forEach(event => {
+      // Veri formatını kontrol et
+      const origin = event.origin || event.source;
+      const target = event.target;
+      
+      if (!origin || !target) {
+        console.log('⚠️ Event missing origin/target for broadcast, skipping:', event.id);
+        return;
+      }
+      
       // Yeni füze eklendi
       this.io.emit('missile:new', {
         id: event.id,
         timestamp: event.timestamp,
-        origin: event.origin,
-        target: event.target,
+        origin: origin,
+        target: target,
         type: event.type,
         status: event.status,
-        threatLevel: event.threatLevel,
+        threatLevel: event.threatLevel || event.threat_level,
         metadata: event.metadata
       });
 
@@ -169,9 +217,9 @@ class RealTimeService {
       this.io.emit('alert:new', {
         id: `alert_${event.id}`,
         type: 'missile_detected',
-        severity: event.threatLevel,
+        severity: event.threatLevel || event.threat_level,
         title: `${event.type} missile detected`,
-        message: `${event.origin.country} → ${event.target.country}`,
+        message: `${origin.country || 'Unknown'} → ${target.country || 'Unknown'}`,
         timestamp: new Date(),
         metadata: {
           missileId: event.id,
@@ -228,8 +276,19 @@ class RealTimeService {
       isRunning: this.isRunning,
       lastCheck: this.lastCheck,
       checkInterval: this.checkInterval,
-      nextCheck: new Date(this.lastCheck.getTime() + this.checkInterval)
+      nextCheck: new Date(this.lastCheck.getTime() + this.checkInterval),
+      useWebScraping: this.useWebScraping,
+      dataSources: {
+        newsAPI: this.newsService ? true : false,
+        webScraping: this.webScrapingService ? true : false
+      }
     };
+  }
+
+  // Web scraping'i açma/kapama
+  toggleWebScraping(enabled) {
+    this.useWebScraping = enabled;
+    console.log(`🕷️ Web scraping ${enabled ? 'enabled' : 'disabled'}`);
   }
 }
 
